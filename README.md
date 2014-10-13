@@ -104,6 +104,6 @@ RSIMType ClearDataTable(RSIMType datatable) {       /* This function clears the 
          datatable.currentrow = 0; }  /* Finally the current row's data is set to 0.*/
       return datatable; }
 
-
+/*alex wrote this*/
 
 
