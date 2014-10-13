@@ -4,7 +4,8 @@ Project-Ginger
 #include <string.h>
 #include <grx20.h>
  
-const int   MAXROW = 1000, MAXCOL = 6, COLt = 1, COLg = 2, COLRo = 3, COLa = 4, COLv = 5, COLh = 6;	
+const int   MAXROW = 1000, MAXCOL = 6, COLt = 1, COLg = 2, COLRo = 3, COLa = 4, COLv = 5, COLh = 6, ob = 40, ib = 10; 
+/* ob is the outer border in the graphics window and ib is an inner border for the graphics windows e.g gap between title and graph axis */
 
 
 typedef struct	RSIMStructure {     /* Defining the data structure that is used throughout the program.*/
