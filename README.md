@@ -10,7 +10,7 @@ const int   MAXROW = 1000, MAXCOL = 6, COLt = 1, COLg = 2, COLRo = 3, COLa = 4, 
 
 typedef struct	RSIMStructure {     /* Defining the data structure that is used throughout the program.*/
     float table[1000][6];            /* The array contained has a fixed number of rows and columns, where the columns are for */
-    int	currentrow;                 /* specific variables.*/                  
+    int	currentrow, xres, yres;                 /* specific variables.*/                  
  }  RSIMType;
 
 
@@ -104,7 +104,19 @@ RSIMType ClearDataTable(RSIMType datatable) {       /* This function clears the 
 	         }
          datatable.currentrow = 0; }  /* Finally the current row's data is set to 0.*/
       return datatable; }
+      
+void Graph_plotter()
+{
+GrSetMode(GR_default_graphics);
 
-/*alex wrote this*/
+xres=GrScreenX();
+yres=GrScreenY();
 
+GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2)+(ob/2)-ib,15);
+GrLine(ob/2,(yres/2)+(ob/2)-ib,xres-(ob/2),(yres/2)+(ob/2)-ib,15);
+GrLine(ob/2,((yres+20)/2)+ib,ob/2,yres-(ob/2),15);
+GrLine(ob/2,yres-(ob/2),(2*(xres-ob))/3,yres-(ob/2),15);
+
+system("PAUSE");
+}
 
