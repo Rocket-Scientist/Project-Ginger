@@ -3,21 +3,23 @@ Project-Ginger
 #include <stdio.h>          /* The libraries needed for the code below.*/
 #include <string.h>
 #include <grx20.h>
+#define pressure_at_sea_level 101325, gravitational_constant 6.67384*pow(10, -11), radius_of_earth 6378100, mass_of_earth 5.9726*pow(10, 24), boltzman_constant 1.3806488 * pow(10, -23)
+
  
-const int   MAXROW = 1000, MAXCOL = 6, COLt = 1, COLg = 2, COLRo = 3, COLa = 4, COLv = 5, COLh = 6, ob = 40, ib = 10; 
-/* ob is the outer border in the graphics window and ib is an inner border for the graphics windows e.g gap between title and graph axis */
+const int   MAXROW = 1000, MAXCOL = 8, COLt = 1, COLRo = 2, COLdrag = 3, COLa = 4, COLv = 5, COLh = 6, COLg = 7, COLm = 8;	
 
 
 typedef struct	RSIMStructure {     /* Defining the data structure that is used throughout the program.*/
-    float table[1000][6];            /* The array contained has a fixed number of rows and columns, where the columns are for */
-    int	currentrow, xres, yres;                 /* specific variables.*/                  
+    float table[1000][8];            /* The array contained has a fixed number of rows and columns, where the columns are for */
+    int	currentrow;                 /* specific variables.*/                  
  }  RSIMType;
 
 
 int Menu();
-int ValidateData();
+int ValidateData(), DrawText(int x, int y, char * graphtitle, int xAlign, int yAlign);
 RSIMType ClearDataTable(RSIMType datatable);
-void DisplayDataTable(RSIMType datatable, int fromrow, int torow);     
+void DisplayDataTable(RSIMType datatable, int fromrow, int torow), Graph_plotter();     
+char * displaytitle = "Atlas V 400 Rocket Simulation Data", * graph1ylabel = "Acceleration (m/s^2)", * graph1xlabel = "Time (s)", * graph2ylabel = "Altitude (m)", * graph2xlabel = "Fuel Usage (kg)";
 
 /* Above is the declaration of the functions used within the program, along with the default axis labels within global character arrays.*/
 
@@ -38,7 +40,7 @@ int main() {                                                            /* Main 
                 case 2:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
                 case 3:  ClearDataTable(datatable); break;
                 case 4:  printf("Task performed\n");break;                             /* The break stops the while loop from running through each option*/                                                             
-                case 5:  printf("Task performed\n");break;
+                case 5:  Graph_plotter();break;
                 case 6:  choice = 0; break;                               /* once a case has been selected.*/   
                 default: printf("\nInvalid entry, please try again\n"); } 
    }
@@ -76,7 +78,7 @@ void  DisplayDataTable(RSIMType datatable, int fromrow, int torow) {
       if (torow > datatable.currentrow-1) {  torow = datatable.currentrow-1;  }  /* Don’t display empty rows.*/
       if (datatable.currentrow == 0) {  printf("The current table is empty\n");  }
       else {
-	      printf("ROW\t\tTime\t\tGravity\t\tAir Density\t\tAcceleration\t\tVelocity\t\tAltitude\n"); 		        /* Column headings.*/
+	      printf("ROW\t\tTime\t\tAir Density\t\tDrag\t\tAcceleration\t\tVelocity\t\tAltitude\t\tGravity\t\tMass of Rocket\n"); 		        /* Column headings.*/
 	      for (row=fromrow;  row<=torow;  row=row+1) {
 	           printf("%d\t\t", row+1);
                for (column=1;  column<=MAXCOL;  column=column+1) {
@@ -104,19 +106,77 @@ RSIMType ClearDataTable(RSIMType datatable) {       /* This function clears the 
 	         }
          datatable.currentrow = 0; }  /* Finally the current row's data is set to 0.*/
       return datatable; }
+
       
-void Graph_plotter()
-{
-GrSetMode(GR_default_graphics);
+void Graph_plotter() {
+    int xres, yres, ob, ib;
+    char str[80];
+    char temp[80];
+    GrMouseEvent evt;
+    ob = 40;
+    ib = 10;                                    /* plotting graphs, axes and labels*/
+    GrSetMode(GR_width_height_graphics,1024,600 );
 
-xres=GrScreenX();
-yres=GrScreenY();
+    xres=GrScreenX();
+    yres=GrScreenY();
 
-GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2)+(ob/2)-ib,15);
-GrLine(ob/2,(yres/2)+(ob/2)-ib,xres-(ob/2),(yres/2)+(ob/2)-ib,15);
-GrLine(ob/2,((yres+20)/2)+ib,ob/2,yres-(ob/2),15);
-GrLine(ob/2,yres-(ob/2),(2*(xres-ob))/3,yres-(ob/2),15);
+    GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2)+(ob/2)-2*(ib),15);
+    GrLine(ob/2,(yres/2)+(ob/2)-2*(ib),xres-(ob/2),(yres/2)+(ob/2)-2*(ib),15);
+    GrLine(ob/2,((yres+20)/2 + 2*ib),ob/2,yres-(3*ib),15);
+    GrLine(ob/2,yres-(3*ib),(2*(xres-ob))/3,yres-(3*ib),15);
+    DrawText1(xres/2, 0, displaytitle, GR_ALIGN_CENTER, GR_ALIGN_TOP );    /*labels*/
+    DrawText2(ib, (yres/4)+((3/2)*ib), graph1ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER );
+    DrawText1(xres/2, ((yres/2)+(ib)), graph1xlabel, GR_ALIGN_CENTER, GR_ALIGN_TOP );
+    DrawText2(ib, yres-(yres/4), graph2ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER );
+    DrawText1(xres/3, yres-2*ib, graph2xlabel, GR_ALIGN_CENTER, GR_ALIGN_TOP );
+    
+    
+    /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
+    /*while(1){
 
-system("PAUSE");
+        GrMouseGetEventT(GR_M_EVENT,&evt,0L);
+        
+        if(evt.flags & (GR_M_KEYPRESS | GR_M_BUTTON_CHANGE))
+        {
+            
+            strcpy(str,"GrScreenX ");
+            sprintf(temp, "%d", GrScreenX());
+            strcat(str,temp);
+            strcat(str," GrScreenY ");
+            sprintf(temp, "%d", GrScreenY());
+            strcat(str,temp);
+            DrawText1(100,100,str,GR_ALIGN_CENTER, GR_ALIGN_CENTER);
+        }
+        
+    }*/
+    
 }
+
+
+
+
+int DrawText1(int x, int y, char * message, int xAlign, int yAlign) {          /*horizontal axes, labels*/                                                
+    GrTextOption grt;                                                     
+    grt.txo_font = &GrDefaultFont;                                        
+    grt.txo_fgcolor.v = GrWhite();
+    grt.txo_bgcolor.v = GrBlack();
+    grt.txo_direct = GR_TEXT_RIGHT;
+    grt.txo_xalign = xAlign;
+    grt.txo_yalign = yAlign;
+    grt.txo_chrtype = GR_BYTE_TEXT;
+    GrDrawString( message,strlen( message ),x,y,&grt ); }     
+    
+    
+    
+    
+int DrawText2(int x, int y, char * message, int xAlign, int yAlign) {             /*vertical axes, labels*/                                             
+    GrTextOption grt;                                                     
+    grt.txo_font = &GrDefaultFont;                                        
+    grt.txo_fgcolor.v = GrWhite();
+    grt.txo_bgcolor.v = GrBlack();
+    grt.txo_direct = GR_TEXT_UP;
+    grt.txo_xalign = xAlign;
+    grt.txo_yalign = yAlign;
+    grt.txo_chrtype = GR_BYTE_TEXT;
+    GrDrawString( message,strlen( message ),x,y,&grt ); }     
 
