@@ -130,6 +130,8 @@ void Graph_plotter() {
     DrawText2(ib, yres-(yres/4), graph2ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER );
     DrawText1(xres/3, yres-2*ib, graph2xlabel, GR_ALIGN_CENTER, GR_ALIGN_TOP );
     
+    DrawText1(((2*(xres-ob))/3)+ob,(yres/2)+ob+ib, graph1ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER);
+    GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),8);
     
     /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
     /*while(1){
