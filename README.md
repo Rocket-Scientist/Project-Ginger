@@ -115,7 +115,7 @@ void Graph_plotter() {
     GrMouseEvent evt;
     ob = 40;
     ib = 10;                                    /* plotting graphs, axes and labels*/
-    GrSetMode(GR_width_height_graphics,1024,600 );
+    GrSetMode(GR_width_height_graphics,1024,600);
 
     xres=GrScreenX();
     yres=GrScreenY();
@@ -130,8 +130,8 @@ void Graph_plotter() {
     DrawText2(ib, yres-(yres/4), graph2ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER );
     DrawText1(xres/3, yres-2*ib, graph2xlabel, GR_ALIGN_CENTER, GR_ALIGN_TOP );
     
-    DrawText1(((2*(xres-ob))/3)+ob,(yres/2)+ob+ib, graph1ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER);
     GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),8);
+    DrawText1(((3*(xres-ib))/4)+ob,(yres/2)+ob+ib, graph1ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER);
     
     /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
     /*while(1){
