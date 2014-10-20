@@ -120,8 +120,8 @@ void Graph_plotter() {
     xres=GrScreenX();
     yres=GrScreenY();
 
-    GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2)+(ob/2)-2*(ib),15);
-    GrLine(ob/2,(yres/2)+(ob/2)-2*(ib),xres-(ob/2),(yres/2)+(ob/2)-2*(ib),15);
+    GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2),15);
+    GrLine(ob/2,(yres/2)+(ob/2)-2*(ib),xres-(ob/2),(yres/2),15);
     GrLine(ob/2,((yres+20)/2 + 2*ib),ob/2,yres-(3*ib),15);
     GrLine(ob/2,yres-(3*ib),(2*(xres-ob))/3,yres-(3*ib),15);
     DrawText1(xres/2, 0, displaytitle, GR_ALIGN_CENTER, GR_ALIGN_TOP );    /*labels*/
@@ -131,7 +131,10 @@ void Graph_plotter() {
     DrawText1(xres/3, yres-2*ib, graph2xlabel, GR_ALIGN_CENTER, GR_ALIGN_TOP );
     
     GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),8);
-    DrawText1(((3*(xres-ib))/4)+ob,(yres/2)+ob+ib, graph1ylabel, GR_ALIGN_CENTER, GR_ALIGN_CENTER);
+    DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(ob), graph1ylabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
+    DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), graph1ylabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
+    DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), graph1ylabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
+    DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), graph1ylabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
     
     /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
     /*while(1){
@@ -181,4 +184,26 @@ int DrawText2(int x, int y, char * message, int xAlign, int yAlign) {           
     grt.txo_yalign = yAlign;
     grt.txo_chrtype = GR_BYTE_TEXT;
     GrDrawString( message,strlen( message ),x,y,&grt ); }     
+    
+float scalex(float xnew, float xres, float xmax){ 
+      xnew = x*(xres/xmax);
+      return xnew;}
+/* A sclaing function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish to plot on and xmax is the maximum x value in the data set*/
 
+float scaley(float ynew, float yres, float ymax){ 
+      ynew = y*(yres/ymax);
+      return ynew;}
+/* A sclaing function where y is the y data point from the initial equations, yres is the bottom right y coordinate of the graph you wish to plot on and ymax is the maximum y value in the data set*/
+
+float max_function(int n){
+      xmax = x[0];
+      ymax = y[0];
+
+      for (i=0;i<n;i=i+1)
+      {
+      if( x[i] > xmax ) xmax = x[i];
+      if( y[i] > ymax ) ymax = y[i];
+      }
+}    
+
+/* 3 functions above not defined at the start*/
