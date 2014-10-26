@@ -20,7 +20,7 @@ int ValidateData(), DrawText(int x, int y, char * graphtitle, int xAlign, int yA
 RSIMType ClearDataTable(RSIMType datatable);
 void DisplayDataTable(RSIMType datatable, int fromrow, int torow), Graph_plotter();     
 char * displaytitle = "Atlas V 400 Rocket Simulation Data", * graph1ylabel = "Acceleration (m/s^2)", * graph1xlabel = "Time (s)", * graph2ylabel = "Altitude (m)", * graph2xlabel = "Fuel Usage (kg)";
-
+float scale(float new, float res, float max), max_function(float xmax, float ymax int n);
 /* Above is the declaration of the functions used within the program, along with the default axis labels within global character arrays.*/
 
 
@@ -185,17 +185,14 @@ int DrawText2(int x, int y, char * message, int xAlign, int yAlign) {           
     grt.txo_chrtype = GR_BYTE_TEXT;
     GrDrawString( message,strlen( message ),x,y,&grt ); }     
     
-float scalex(float xnew, float xres, float xmax){ 
-      xnew = x*(xres/xmax);
-      return xnew;}
-/* A sclaing function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish to plot on and xmax is the maximum x value in the data set*/
+float scale(float new, float res, float max){ 
+      new = x*(res/max);
+      return new;}
+      
+/* A sclaing function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
+ to plot on and xmax is the maximum x value in the data set*/
 
-float scaley(float ynew, float yres, float ymax){ 
-      ynew = y*(yres/ymax);
-      return ynew;}
-/* A sclaing function where y is the y data point from the initial equations, yres is the bottom right y coordinate of the graph you wish to plot on and ymax is the maximum y value in the data set*/
-
-float max_function(int n){
+float max_function(float xmax, float ymax int n){
       xmax = x[0];
       ymax = y[0];
 
@@ -204,6 +201,4 @@ float max_function(int n){
       if( x[i] > xmax ) xmax = x[i];
       if( y[i] > ymax ) ymax = y[i];
       }
-}    
-
-/* 3 functions above not defined at the start*/
+} 
