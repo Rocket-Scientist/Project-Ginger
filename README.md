@@ -37,10 +37,10 @@ int ValidateData(), DrawText(int x, int y, char * graphtitle, int xAlign, int yA
 
 RSIMType ClearDataTable(RSIMType datatable), AddData(RSIMType datatable);
 
-void DisplayDataTable(RSIMType datatable, int fromrow, int torow), Graph_plotter();  
+void DisplayDataTable(RSIMType datatable, int fromrow, int torow), plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xres, float yres), Graph_plotter();  
    
 char * displaytitle = "Atlas V 400 Rocket Simulation Data", * graph1ylabel = "Acceleration (m/s^2)", * graph1xlabel = "Time (s)", * graph2ylabel = "Altitude (m)", * graph2xlabel = "Fuel Usage (kg)";
-float scale(float new, float res, float max), max_function(float xmax, float ymax int n);
+float scale(float res, float max, RSIMType datatable, int row, int column), max_function(RSIMType datatable, int column);
 
 float timer(float dt);
 float calc_density(float air_temp, float molar_mass);
@@ -179,8 +179,11 @@ void Graph_plotter() {
     DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), graph2ylabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
     DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), graph2xlabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
     DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), graph1xlabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
+    
+     void plot_graph( 1, 4, datatable, max,(xres - (ob/2)), ((yres/2)+(ob/2)-2*(ib)); /* function to plot accleration against time on the top graph*/
+     
     /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
-    /*while(1){
+    while(1){
 
         GrMouseGetEventT(GR_M_EVENT,&evt,0L);
         
@@ -196,7 +199,7 @@ void Graph_plotter() {
             DrawText1(100,100,str,GR_ALIGN_CENTER, GR_ALIGN_CENTER);
         }
         
-    }*/
+    }
     
 }
 
@@ -388,21 +391,33 @@ int CentaurEngineType(int centaur_engine_type, int i) {
 
 /*for temperature, i have googled rocket launches from the uk. on of the sites i a place called south uist. I have found the average temperature there to be about 7 degrees C so we could use this as our default case and then on the start menu when it says what the programme is we could just say "this programme is designed to simulate an Atlas V launching from Soutch Uist" or something like that*/   
     
-float scale(float new, float res, float max){ 
-      new = x*(res/max);
+float scale(float res, float max, RSIMType datatable, int row, int column){ 
+      float new;
+      new = datatable.table[row][column]*(res/max);
       return new;}
       
 /* A sclaing function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
  to plot on and xmax is the maximum x value in the data set*/
 
-float max_function(float xmax, float ymax int n){
-      xmax = x[0];
-      ymax = y[0];
+float max_function(RSIMType datatable, int column){
+      float max;
+      int row;
+      
+      max = datatable.table[0][column];
+      for (row=0;  row<=MAXROW;  row=row+1){ 
+          if( datatable.table[row][column] > max ) max = datatable.table[row][column];
+          }
+      return max;} 
 
-      for (i=0;i<n;i=i+1)
-      {
-      if( x[i] > xmax ) xmax = x[i];
-      if( y[i] > ymax ) ymax = y[i];
-      }
-} 
+void plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xres, float yres){
+     float xmax, ymax;
+     int row;
+     
+     xmax = max_function(datatable, column_x);
+     ymax = max_function(datatable, column_y);
+     
+     for (row=0;  row<=MAXROW;  row=row+1){
+     GrLine(scale(xres, xmax, datatable, row, column_x), scale(yres, ymax, datatable, row, column_y), scale(xres, xmax, datatable, (row + 1), column_x), scale( yres, ymax, datatable, (row + 1), column_y),15);
+     }
+}
 
