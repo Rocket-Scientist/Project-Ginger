@@ -37,10 +37,11 @@ int ValidateData(), DrawText(int x, int y, char * graphtitle, int xAlign, int yA
 
 RSIMType ClearDataTable(RSIMType datatable), AddData(RSIMType datatable);
 
-void DisplayDataTable(RSIMType datatable, int fromrow, int torow), plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xres, float yres), Graph_plotter();  
+void DisplayDataTable(RSIMType datatable, int fromrow, int torow), plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xborderless, float yborderless), Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, float xborderless, float yborderless);  
    
 char * displaytitle = "Atlas V 400 Rocket Simulation Data", * graph1ylabel = "Acceleration (m/s^2)", * graph1xlabel = "Time (s)", * graph2ylabel = "Altitude (m)", * graph2xlabel = "Fuel Usage (kg)";
-float scale(float res, float max, RSIMType datatable, int row, int column), max_function(RSIMType datatable, int column);
+int scale(float res, float max, RSIMType datatable, int row, int column);
+float max_function(RSIMType datatable, int column);
 
 float timer(float dt);
 float calc_density(float air_temp, float molar_mass);
@@ -65,17 +66,21 @@ int main() {                                                            /* Main 
     int number_of_boosters; 
     int inert_mass;   
     int centaur_engine_type;
-    int i;                                                 /* Variables declared, and current row in the data table set to 0.*/
+    int i = 0;
+    int max = 0;
+    int column_x = COLt;
+    int column_y = COLv; 
+    float xborderless, yborderless;                                                /* Variables declared, and current row in the data table set to 0.*/
     datatable.currentrow = 0;
     choice = 99;                                                        /* Enters the while loop.*/
     while(choice != 0) {
-        choice = Menu();                                                /* Case statements corresponding to the users choice.*/
+        choice = Menu();                         /* Case statements corresponding to the users choice.*/
         switch(choice) {                                                /* Each one calls a function to perform a certain task.*/
                 case 1:  datatable = AddData(datatable);break;          /* If the input is incorrect, an error message will be displayed.*/
                 case 2:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
                 case 3:  datatable = ClearDataTable(datatable); break;
                 case 4:  ChangeParameters(payload, number_of_boosters, inert_mass, centaur_engine_type, i); break;                             /* The break stops the while loop from running through each option*/                                                             
-                case 5:  Graph_plotter(); break;
+                case 5:  Graph_plotter(column_x, column_y, datatable, max, xborderless, yborderless); break;
                 case 6:  choice = 0; break;                               /* once a case has been selected.*/   
                 default: printf("\nInvalid entry, please try again\n"); } 
    }
@@ -152,17 +157,21 @@ RSIMType ClearDataTable(RSIMType datatable) {       /* This function clears the 
       return datatable; }
 
       
-void Graph_plotter() {
+void Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, float xborderless, float yborderless) {
     int xres, yres, ob, ib;
     char str[80];
     char temp[80];
     GrMouseEvent evt;
-    ob = 40;
-    ib = 10;                                    /* plotting graphs, axes and labels*/
     GrSetMode(GR_width_height_graphics,1024,600);
-
+    ob = 40;
+    ib = 10;   
     xres=GrScreenX();
     yres=GrScreenY();
+    xborderless = (xres - (ob/2));
+    yborderless = (yres/2)+(ob/2)-(2*(ib));                                 /* plotting graphs, axes and labels*/
+    
+
+    
 
     GrLine(ob/2,(ob/2)+ib,ob/2,(yres/2)+(ob/2)-2*(ib),15);
     GrLine(ob/2,(yres/2)+(ob/2)-2*(ib),xres-(ob/2),(yres/2)+(ob/2)-2*(ib),15);
@@ -180,7 +189,7 @@ void Graph_plotter() {
     DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), graph2xlabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
     DrawText1(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), graph1xlabel, GR_ALIGN_LEFT, GR_ALIGN_TOP);
     
-     void plot_graph( 1, 4, datatable, max,(xres - (ob/2)), ((yres/2)+(ob/2)-2*(ib)); /* function to plot accleration against time on the top graph*/
+    plot_graph(column_x, column_y, datatable, max, xborderless, yborderless); /* function to plot accleration against time on the top graph*/
      
     /* GrContext *GrCurrentContext(void) or GetScreenContext()         */
     while(1){
@@ -390,34 +399,46 @@ int CentaurEngineType(int centaur_engine_type, int i) {
       }*/
 
 /*for temperature, i have googled rocket launches from the uk. on of the sites i a place called south uist. I have found the average temperature there to be about 7 degrees C so we could use this as our default case and then on the start menu when it says what the programme is we could just say "this programme is designed to simulate an Atlas V launching from Soutch Uist" or something like that*/   
+ void plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xborderless, float yborderless){
+     float xmax, ymax;     
+     int row;
+     int x1,x2,y1,y2;
+     /*printf("plot_graph start colX:%d\n",column_x);*/
+     xmax = max_function(datatable, column_x);
+     ymax = max_function(datatable, column_y);
+     printf("yboarderless:%f",yborderless);
+     for (row=0;  row<MAXROW-1;  row=row+1){
+        /*x1 = (xborderless/MAXROW)*row;*/
+        x1 = scale(xborderless, xmax, datatable, row, column_x);
+        y1 = yborderless - scale(yborderless, ymax, datatable, row, column_y);
+        x2 = scale(xborderless, xmax, datatable, row+1, column_x);
+        y2 = yborderless - scale(yborderless, ymax, datatable, (row + 1), column_y);
+        GrLine(x1, y1, x2, y2, 15);
+     }              
+}
+
     
-float scale(float res, float max, RSIMType datatable, int row, int column){ 
-      float new;
-      new = datatable.table[row][column]*(res/max);
-      return new;}
-      
 /* A sclaing function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
  to plot on and xmax is the maximum x value in the data set*/
 
 float max_function(RSIMType datatable, int column){
-      float max;
-      int row;
+    float max;
+    int row;
+    /*printf("max start 0:0 %f\n",datatable.table[0][column]);*/
+    max = datatable.table[0][column];
+    for (row=0;  row<MAXROW;  row=row+1){ 
+        if( datatable.table[row][column] > max ) {
+            max = datatable.table[row][column];
+        }
+    }
+    return max;
+    
+} 
       
-      max = datatable.table[0][column];
-      for (row=0;  row<=MAXROW;  row=row+1){ 
-          if( datatable.table[row][column] > max ) max = datatable.table[row][column];
-          }
-      return max;} 
+      
 
-void plot_graph( int column_x, int column_y, RSIMType datatable, float max, float xres, float yres){
-     float xmax, ymax;
-     int row;
-     
-     xmax = max_function(datatable, column_x);
-     ymax = max_function(datatable, column_y);
-     
-     for (row=0;  row<=MAXROW;  row=row+1){
-     GrLine(scale(xres, xmax, datatable, row, column_x), scale(yres, ymax, datatable, row, column_y), scale(xres, xmax, datatable, (row + 1), column_x), scale( yres, ymax, datatable, (row + 1), column_y),15);
-     }
+int scale(float res, float max, RSIMType datatable, int row, int column){ 
+      float new;
+      new = datatable.table[row][column]*(res/max);
+      return floor(new);
 }
-
