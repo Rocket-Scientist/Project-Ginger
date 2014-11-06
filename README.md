@@ -32,7 +32,7 @@ typedef struct	RSIMStructure {     /* Defining the data structure that is used t
  }  RSIMType;
 
    
-
+char * displaytitle = "Atlas V 400 Rocket Simulation Data", * graph1yalabel = "Acceleration (m/s^2)",* graph1yblabel = "Velocity (m/s^1)", * graph1xlabel = "Time (s)", * graph2ylabel = "Rocket Mass (kg)", *graph2xlabel = "Altitude (m)";
 
 
 /* Above is the declaration of the different axes titles that are displayed within the graphics window.  They can easily be changed to*/
@@ -132,15 +132,13 @@ int DrawText2(int x, int y, char * message, int xAlign, int yAlign, char color) 
 float max_function(RSIMType datatable, int column){
     float max;
     int row;
-    printf("column = %d\n", column);
     max = datatable.table[0][column];
     for (row=0;  row<MAXROW;  row=row+1){ 
         if( datatable.table[row][column] > max ) {
             max = datatable.table[row][column];
         }
     }
-    printf("max= %.2f\n", max);
-    return ceil(max);   
+    return max;   
 } 
       
 /* A scaling function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
@@ -173,23 +171,31 @@ int reverse_scale(int x, int start, int end, int max){
 }
       
       
+/*Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb){*/
 Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
     int xres, yres, ob, ib, i, exit_cross_size, xa_max, y1a_max, y2a_max, xb_max, yb_max;
     int x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b;
+    int row_in_table;
     char str[80];
     char temp[80];
-    char displaytitle[34], acc_display[40], time_display[40], velocity_display[40], y1a_value[40], xb_value[40], xa_value[40], y2a_value[40], yb_value[40];
+    char displaytitle[34], acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40], y1a_value[40], y2a_value[40], yb_value[40], xa_value[40], xb_value[40];
     GrMouseEvent evt;
-    GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN)-100,GetSystemMetrics(SM_CYSCREEN)-100);  /*makes the graphics window full size*/
-    /*GrSetMode(GR_width_height_graphics,2100,1000);*/
+    GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN)); /* makes the graphics window full size*/
     GrClearScreen(15);    /* Makes the graphics window white*/
     ob = 40;
     ib = 10;   
     xres=GrScreenX();
     yres=GrScreenY();
     
-    printf("%i", variable_y1a);
     sprintf (displaytitle, "Atlas V 400 Rocket Simulation Data");
+    sprintf (acc_display, "Acceleration (m/s^2)");
+    sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
+    sprintf (time_display, "time (s)");
+    sprintf (Mass_display, "Rocket Mass (kg)");
+    sprintf (Altitude_display, "Altitude (m)");
+    sprintf (Drag_display, "Drag (N)");
+    sprintf (Gravity_display, "Gravity (N)");
+    sprintf (Density_display, "Air Density (kg/M^3)");
     
     x1a = ob/2;
     y1a = (yres/2)+(ob/2)-2*(ib);
@@ -210,9 +216,9 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     DrawText1(xres/2, 0, displaytitle, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());    /*labels*/
     DrawText2(ib, (yres/4)+((3/2)*ib), y1a_label, GR_ALIGN_CENTER, GR_ALIGN_CENTER,GrBlack());
     DrawText2(xres - ib, (yres/4)+((3/2)*ib), y2a_label, GR_ALIGN_CENTER, GR_ALIGN_CENTER,GrBlack());
-    DrawText1(xres/2, ((yres/2)+(ib)), xa_label, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
+    DrawText1(xres/2, ((yres/2)+(ib)), time_display, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
     DrawText2(ib, yres-(yres/4), yb_label, GR_ALIGN_CENTER, GR_ALIGN_CENTER, GrBlack());
-    DrawText1(xres/3, yres-2*ib, xb_label, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
+    DrawText1(xres/3, yres-2*ib, time_display, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
     
     
     
@@ -224,59 +230,70 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     GrLine(xres - exit_cross_size,0,xres,exit_cross_size,12);      /*Exit cross*/
     GrLine(xres - exit_cross_size,exit_cross_size,xres,0,12);      /*Exit cross*/
     
-    sprintf (y1a_value, "N/A");        
-            sprintf (y2a_value, "N/A");
-            sprintf (xa_value, "N/A");
-            sprintf (yb_value, "N/A");
-            sprintf (xb_value, "N/A");
+    xa_max = max_function(datatable, variable_xa);
+    y1a_max = max_function(datatable, variable_y1a);
+    y2a_max = max_function(datatable, variable_y2a);
+    xb_max = max_function(datatable, variable_xb);
+    yb_max = max_function(datatable, variable_yb);
     
     i = 1;
     while(i != -1){
 
         GrMouseGetEventT(GR_M_LEFT_DOWN,&evt,0L);
         
-        GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(ob), y1a_label, 4, 8);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), y2a_label, 1, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), xa_label, 15, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), yb_label, 15, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(5*ob), xb_label, 15, 8);
+        GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(ob), y1a_label, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), y2a_label, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), yb_label, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), time_display, 0, 14);
+        /*GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(5*ob), Drag_display, 0, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(6*ob), Gravity_display, 0, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(7*ob), Density_display, 0, 14);*/
         
         
-        
-        xa_max = max_function(datatable, variable_xa);
-        y1a_max = max_function(datatable, variable_y1a);
-        y2a_max = max_function(datatable, variable_y2a);
-        xb_max = max_function(datatable, variable_xb);
-        yb_max = max_function(datatable, variable_yb);
-        
+                
         if(evt.buttons == 1 && evt.dtime > 0.01){                                   /*this displays the values of the graph where you click in the parameters box*/
-            sprintf (y1a_value, "N/A");        
-            sprintf (y2a_value, "N/A");
-            sprintf (xa_value, "N/A");
-            sprintf (yb_value, "N/A");
-            sprintf (xb_value, "N/A");
-            if (evt.y > y2a && evt.y < y1a && evt.x < x2a && evt.x > x1a) {         /*the if statements determine whether the user is clicking on the graph or not*/  
-                      sprintf (y1a_value, "%03.1d", reverse_scale( evt.y, y1a, y2a, y1a_max));       /*sprintf used to change the values printed in the parameter box in the graphics window*/
-                      sprintf (y2a_value, "%04.0d", reverse_scale( evt.y, y1a, y2a, y2a_max));
-                      sprintf (xa_value, "%03.0d", reverse_scale( evt.x, x1a, x2a, xa_max));
+            sprintf (y1a_value, "= N/A");        
+            sprintf (y2a_value, "= N/A");
+            sprintf (yb_value, "= N/A");
+            sprintf (xb_value, "= N/A");
+            sprintf (Density_display, "Air Density (kg/M^3) = N/A");
+            sprintf (Mass_display, "Rocket Mass (kg) = N/A");
+            sprintf (Altitude_display, "Altitude (m) = N/A");
+             
+            row_in_table = -1;
+            if (evt.y > y2a && evt.y < y1a && evt.x < x2a && evt.x > x1a) { row_in_table = reverse_scale( evt.x, x1a, x2a, xa_max);}
+            if (row_in_table != -1) {
+                             sprintf (acc_display, "Acceleration (m/s^2) = %.3f", datatable.table[row_in_table][COLa]);
+                             sprintf (velocity_display, "Velocity (m/s) = %.3f", datatable.table[row_in_table][COLv]);
+                             sprintf (Mass_display, "Rocket Mass (kg) = %.3f", datatable.table[row_in_table][COLm]);
+                             sprintf (Altitude_display, "Altitude (m) = %.3f", datatable.table[row_in_table][COLh]);
+                             sprintf (Drag_display, "Drag (N)  = %.3f", datatable.table[row_in_table][COLdrag]);
+                             sprintf (Gravity_display, "Gravity (N)  = %.3f", datatable.table[row_in_table][COLg]);
+                             sprintf (Density_display, "Air Density (kg/M^3) = %.3f", datatable.table[row_in_table][COLRo]);
+                             }
+            if (evt.y > y2a && evt.y < y1a && evt.x < x2a && evt.x > x1a) {         /*the if statements determine whether the user is clicking on the graph or not*/
+                      sprintf (y1a_value, "= %d", reverse_scale( evt.y, y1a, y2a, y1a_max));
+                      sprintf (y2a_value, "= %d", reverse_scale( evt.y, y1a, y2a, y2a_max));
+                      sprintf (xb_value, "= %d", reverse_scale( evt.x, x1a, x2a, xa_max));               /*sprintf used to change the values printed in the parameter box in the graphics window*/         
             }
-            if (evt.y > y2b && evt.y < y1b && evt.x < x2b && evt.x > x1b) {    
-                      sprintf (yb_value, "%03.0d", reverse_scale( evt.y, y1b, y2b, yb_max));
-                      sprintf (xb_value, "%06.0d", reverse_scale( evt.x, x1b, x2b, xb_max));
+            if (evt.y > y2b && evt.y < y1b && evt.x < x2b && evt.x > x1b) {
+                          
+                      sprintf (yb_value, "= %d", reverse_scale( evt.y, y1b, y2b, yb_max));
+                      sprintf (xb_value, "= %d", reverse_scale( evt.x, x1b, x2b, xb_max));
             }
+                          
             if (evt.x > (xres -exit_cross_size) && evt.y < exit_cross_size) {       /*this is to exit the while loop when the cross is clicked*/
                i = -1;
+               GrMouseUnInit();
+               GrSetMode(GR_default_text);
             }       
         }
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 8);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(2*ob), y2a_value, 1, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(3*ob), xa_value, 15, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(4*ob), yb_value, 15, 8);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(5*ob), xb_value, 15, 8); 
-    }
-    GrSetMode(GR_default_text);
-    GrMouseUnInit();
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(2*ob), y2a_value, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(3*ob), yb_value, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(4*ob), xb_value, 0, 14); 
+    }  
 } 
 
 void graph_menu(RSIMType datatable){
@@ -552,6 +569,10 @@ int main() {                                                            /* Main 
     RSIMType datatable;
     int choice;
     int i;  
+    int xborderless;
+    int yborderless;  
+    int column_x;
+    int column_y;
     int payload = 4003;                                                 /*medium payload is the default*/
     int centaur_engine_type = 99200;                                            /*this is the thrust from single engine common centaur, this is the default, not used but added for extendability*/
     float drag_coefficient = 0.42;
@@ -561,7 +582,7 @@ int main() {                                                            /* Main 
     int detach_atlas_booster_time = 250;         
     int number_of_boosters = 3;                                      /* Variables declared, and current row in the data table set to 0.*/
     int inert_mass = 51203;
-    int max = 0;  
+    int max = 0;      
     datatable.currentrow = 0;
     choice = 99; 
     datatable = AddData(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time);                                                       /* Enters the while loop.*/
@@ -570,7 +591,7 @@ int main() {                                                            /* Main 
         switch(choice) {                                                /* Each one calls a function to perform a certain task.*/
                 case 1:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
                 case 2:  datatable = AskChangeParameters(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time, &centaur_engine_type); break;                             /* The break stops the while loop from running through each option*/                                                             
-                case 3:  graph_menu(datatable); break;
+                case 3:  /*Graph_plotter(column_x, column_y, datatable, max, 1, 6, 4, 5, 8);*/graph_menu(datatable); break;
                 case 4:  Export_to_excel(datatable, &detach_atlas_booster_time); break;
                 case 5:  choice = 0; break;                               /* once a case has been selected.*/   
                 default: printf("\nInvalid entry, please try again\n"); } 
