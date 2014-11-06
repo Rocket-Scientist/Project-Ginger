@@ -5,7 +5,7 @@
 #include <string.h>
 #include <grx20.h>
 #include <math.h>
-#include <windows.h>
+/*#include <windows.h>*/
 
 const int pressure_at_sea_level = 101325;
 const int radius_of_earth = 6371000;
@@ -180,7 +180,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     char temp[80];
     char displaytitle[34], acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40];
     GrMouseEvent evt;
-    GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN)-100,GetSystemMetrics(SM_CYSCREEN)-100);  /*makes the graphics window full size*/
+    /*GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN)-100,GetSystemMetrics(SM_CYSCREEN)-100);  /*makes the graphics window full size*/
+    GrSetMode(GR_width_height_graphics,2100,1000);
     GrClearScreen(15);    /* Makes the graphics window white*/
     ob = 40;
     ib = 10;   
@@ -268,6 +269,45 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     }  
 } 
 
+void graph_menu(RSIMType datatable){
+     int xa, xb, y1a, y2a, yb, max, choice, option2;
+     char xa_label[40], xb_label[40], y1a_label[40], y2a_label[40], yb_label[40], acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40]; 
+             
+             sprintf (acc_display, "Acceleration (m/s^2)");
+             sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
+             sprintf (time_display, "time (s)");
+             sprintf (Mass_display, "Rocket Mass (kg)");
+             sprintf (Altitude_display, "Altitude (m)");
+             sprintf (Drag_display, "Drag (N)");
+             sprintf (Gravity_display, "Gravity (N)");
+             sprintf (Density_display, "Air Density (kg/M^3)");
+             
+             while(choice != 0){
+                          printf("\nWhich two variables would you like to plot against time?.\n\n");
+                          printf("1.\tRocket mass (Kg)\n");
+                          printf("2.\tAltitude (m)\n");
+                          printf("3.\tDrag (N)\n");
+                          printf("4.\tGravity (N)\n");
+                          printf("5.\tAir Density (Kg/m^3\n\n");
+                          printf("6.\tReturn to menu);
+                          choice = ValidateData();
+                          
+                          
+                          switch(choice);
+                                    case 1: y1a = 8; 
+                                            y1a_label = Mass_display; break;                 
+                                    case 2: y1a = 6;
+                                            y1a_label = Altitude_display; break;                                                                                       
+                                    case 3: y1a = 3; 
+                                            y1a_label = Drag_display; break;    
+                                    case 4: y1a = 7; 
+                                            y1a_label = Gravity_display; break;    
+                                    case 5: y1a = 2; 
+                                            y1a_label = Density_display; break;    
+                                    case 6:  choice = 0; break;   
+                                    }                       
+                          Graph_plotter( datatable, max, 1, 1, y1a, y2a, yb, xa_label, xb_label, y1a_label, y2a_label, yb_label);
+}
 
 float timer(float dt){
       time = (time + dt);
@@ -509,10 +549,6 @@ int main() {                                                            /* Main 
     RSIMType datatable;
     int choice;
     int i;  
-    int xborderless;
-    int yborderless;  
-    int column_x;
-    int column_y;
     int payload = 4003;                                                 /*medium payload is the default*/
     int centaur_engine_type = 99200;                                            /*this is the thrust from single engine common centaur, this is the default, not used but added for extendability*/
     float drag_coefficient = 0.42;
@@ -523,26 +559,15 @@ int main() {                                                            /* Main 
     int number_of_boosters = 3;                                      /* Variables declared, and current row in the data table set to 0.*/
     int inert_mass = 51203;
     int max = 0;  
-    char acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40]; 
     datatable.currentrow = 0;
     choice = 99; 
-    
-    sprintf (acc_display, "Acceleration (m/s^2)");
-    sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
-    sprintf (time_display, "time (s)");
-    sprintf (Mass_display, "Rocket Mass (kg)");
-    sprintf (Altitude_display, "Altitude (m)");
-    sprintf (Drag_display, "Drag (N)");
-    sprintf (Gravity_display, "Gravity (N)");
-    sprintf (Density_display, "Air Density (kg/M^3)");
-    
     datatable = AddData(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time);                                                       /* Enters the while loop.*/
     while(choice != 0) {
         choice = Menu();                                                /* Case statements corresponding to the users choice.*/
         switch(choice) {                                                /* Each one calls a function to perform a certain task.*/
                 case 1:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
                 case 2:  datatable = AskChangeParameters(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time, &centaur_engine_type); break;                             /* The break stops the while loop from running through each option*/                                                             
-                case 3:  Graph_plotter( datatable, max, 1, 6, 8, 5, 3, time_display, Altitude_display, Mass_display, velocity_display, Drag_display); break;
+                case 3:  grpah_menu(datatable); break;
                 case 4:  Export_to_excel(datatable, &detach_atlas_booster_time); break;
                 case 5:  choice = 0; break;                               /* once a case has been selected.*/   
                 default: printf("\nInvalid entry, please try again\n"); } 
@@ -550,20 +575,3 @@ int main() {                                                            /* Main 
    printf("Program ended.\n");
    return 0; 
 }
-
-graph_menu(){
-             printf("\nWhich two variables would you like to plot against time?.\n\n");
-             printf("1.\tRocket mass (Kg)\n");
-             printf("2.\tAltitude (m)\n");
-             printf("3.\tDrag (N)\n");
-             printf("4.\tGravity (N)\n");
-             printf("5.\tAir Density (Kg/m^3\n\n");
-             printf("6.\tReturn to menu);
-             while(choice != 0){
-                          switch(choice)
-                                    case 1:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
-                                    case 2:  datatable = AskChangeParameters(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time, &centaur_engine_type); break;                             /* The break stops the while loop from running through each option*/                                                             
-                                    case 3:  Graph_plotter( datatable, max, 1, 6, 8, 5, 3, time_display, Altitude_display, Mass_display, velocity_display, Drag_display); break;
-                                    case 4:  Export_to_excel(datatable, &detach_atlas_booster_time); break;
-                                    case 5:  choice = 0; break;                               /* once a case has been selected.*/
-                          Graph_plotter( RSIMType datatable, max, 1, 1, variable_y1a, variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
