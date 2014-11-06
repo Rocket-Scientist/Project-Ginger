@@ -138,7 +138,7 @@ float max_function(RSIMType datatable, int column){
             max = datatable.table[row][column];
         }
     }
-    return max;   
+    return ceil(max);   
 } 
       
 /* A scaling function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
@@ -178,7 +178,7 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     int row_in_table;
     char str[80];
     char temp[80];
-    char displaytitle[34], acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40], y1a_value[40], y2a_value[40], yb_value[40], xa_value[40], xb_value[40];
+    char displaytitle[34], time_display[40], y1a_value[40], y2a_value[40], yb_value[40], xa_value[40], xb_value[40];
     GrMouseEvent evt;
     GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN)); /* makes the graphics window full size*/
     GrClearScreen(15);    /* Makes the graphics window white*/
@@ -186,16 +186,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     ib = 10;   
     xres=GrScreenX();
     yres=GrScreenY();
-    
-    sprintf (displaytitle, "Atlas V 400 Rocket Simulation Data");
-    sprintf (acc_display, "Acceleration (m/s^2)");
-    sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
+     
     sprintf (time_display, "time (s)");
-    sprintf (Mass_display, "Rocket Mass (kg)");
-    sprintf (Altitude_display, "Altitude (m)");
-    sprintf (Drag_display, "Drag (N)");
-    sprintf (Gravity_display, "Gravity (N)");
-    sprintf (Density_display, "Air Density (kg/M^3)");
     
     x1a = ob/2;
     y1a = (yres/2)+(ob/2)-2*(ib);
@@ -219,8 +211,6 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     DrawText1(xres/2, ((yres/2)+(ib)), time_display, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
     DrawText2(ib, yres-(yres/4), yb_label, GR_ALIGN_CENTER, GR_ALIGN_CENTER, GrBlack());
     DrawText1(xres/3, yres-2*ib, time_display, GR_ALIGN_CENTER, GR_ALIGN_TOP, GrBlack());
-    
-    
     
     plot_graph(variable_xa, variable_y1a, datatable, x1a, y1a, x2a, y2a, 4); /* function to plot accleration against time on the top graph*/
     plot_graph(variable_xa, variable_y2a, datatable, x1a, y1a, x2a, y2a, 1); /* function to plot velocity against time on the top graph*/
@@ -246,43 +236,21 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), y2a_label, 1, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), yb_label, 2, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), time_display, 0, 14);
-        /*GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(5*ob), Drag_display, 0, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(6*ob), Gravity_display, 0, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(7*ob), Density_display, 0, 14);*/
-        
-        
                 
-        if(evt.buttons == 1 && evt.dtime > 0.01){                                   /*this displays the values of the graph where you click in the parameters box*/
+        if(evt.buttons == 1){                                   /*this displays the values of the graph where you click in the parameters box*/
             sprintf (y1a_value, "= N/A");        
             sprintf (y2a_value, "= N/A");
             sprintf (yb_value, "= N/A");
             sprintf (xb_value, "= N/A");
-            sprintf (Density_display, "Air Density (kg/M^3) = N/A");
-            sprintf (Mass_display, "Rocket Mass (kg) = N/A");
-            sprintf (Altitude_display, "Altitude (m) = N/A");
-             
-            row_in_table = -1;
-            if (evt.y > y2a && evt.y < y1a && evt.x < x2a && evt.x > x1a) { row_in_table = reverse_scale( evt.x, x1a, x2a, xa_max);}
-            if (row_in_table != -1) {
-                             sprintf (acc_display, "Acceleration (m/s^2) = %.3f", datatable.table[row_in_table][COLa]);
-                             sprintf (velocity_display, "Velocity (m/s) = %.3f", datatable.table[row_in_table][COLv]);
-                             sprintf (Mass_display, "Rocket Mass (kg) = %.3f", datatable.table[row_in_table][COLm]);
-                             sprintf (Altitude_display, "Altitude (m) = %.3f", datatable.table[row_in_table][COLh]);
-                             sprintf (Drag_display, "Drag (N)  = %.3f", datatable.table[row_in_table][COLdrag]);
-                             sprintf (Gravity_display, "Gravity (N)  = %.3f", datatable.table[row_in_table][COLg]);
-                             sprintf (Density_display, "Air Density (kg/M^3) = %.3f", datatable.table[row_in_table][COLRo]);
-                             }
             if (evt.y > y2a && evt.y < y1a && evt.x < x2a && evt.x > x1a) {         /*the if statements determine whether the user is clicking on the graph or not*/
                       sprintf (y1a_value, "= %d", reverse_scale( evt.y, y1a, y2a, y1a_max));
                       sprintf (y2a_value, "= %d", reverse_scale( evt.y, y1a, y2a, y2a_max));
                       sprintf (xb_value, "= %d", reverse_scale( evt.x, x1a, x2a, xa_max));               /*sprintf used to change the values printed in the parameter box in the graphics window*/         
             }
             if (evt.y > y2b && evt.y < y1b && evt.x < x2b && evt.x > x1b) {
-                          
                       sprintf (yb_value, "= %d", reverse_scale( evt.y, y1b, y2b, yb_max));
                       sprintf (xb_value, "= %d", reverse_scale( evt.x, x1b, x2b, xb_max));
-            }
-                          
+            }             
             if (evt.x > (xres -exit_cross_size) && evt.y < exit_cross_size) {       /*this is to exit the while loop when the cross is clicked*/
                i = -1;
                GrMouseUnInit();
@@ -292,7 +260,7 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(2*ob), y2a_value, 1, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(3*ob), yb_value, 2, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(4*ob), xb_value, 0, 14); 
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(4*ob), xb_value, 0, 14);
     }  
 } 
 
@@ -303,8 +271,8 @@ void graph_menu(RSIMType datatable){
              sprintf (acc_display, "Acceleration (m/s^2)");
              sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
              sprintf (time_display, "time (s)");
-             choice = 1;
-             while(choice != 0){
+             i = 1;
+             while(i < 4){
                           printf("\nWhich two variables would you like to plot against time?.\n\n");
                           printf("1.\tRocket mass (Kg)\n");
                           printf("2.\tAltitude (m)\n");
@@ -313,20 +281,55 @@ void graph_menu(RSIMType datatable){
                           printf("5.\tAir Density (Kg/m^3\n\n");
                           choice = ValidateData();
                           switch(choice){
-                                    case 1: y1a = 8;  
-                                            sprintf (y1a_label, "Rocket Mass (kg)");break;                 
-                                    case 2: y1a = 6;
-                                            sprintf (y1a_label, "Altitude (m)");break;                                                                                       
-                                    case 3: y1a = 3; 
-                                            sprintf(y1a_label, "Drag (N)");break;    
-                                    case 4: y1a = 7; 
-                                            sprintf (y1a_label, "Gravity (N)");break;    
-                                    case 5: y1a = 2; 
-                                            sprintf (y1a_label, "Air Density (kg/M^3)"); break;
+                                    case 1: if (i = 1) {
+                                            y1a = 8;  
+                                            sprintf (y1a_label, "Rocket Mass (kg)");
+                                            }
+                                            if (i = 2) {
+                                            y2a = 8;  
+                                            sprintf (y2a_label, "Rocket Mass (kg)");
+                                            }
+                                            break;                 
+                                    case 2: if (i = 1) {
+                                            y1a = 6;
+                                            sprintf (y1a_label, "Altitude (m)");
+                                            }
+                                            if (i = 2) {
+                                            y2a = 6;
+                                            sprintf (y2a_label, "Altitude (m)");
+                                            }
+                                            break;                                                                                       
+                                    case 3: if (i = 1) {
+                                            y1a = 3; 
+                                            sprintf(y1a_label, "Drag (N)");
+                                            }
+                                            if (i = 2) {
+                                            y2a = 6;
+                                            sprintf (y2a_label, "Altitude (m)");
+                                            }
+                                            break;    
+                                    case 4: if (i = 1) {
+                                            y1a = 7; 
+                                            sprintf (y1a_label, "Gravity (N)");
+                                            }
+                                            if (i = 2) {
+                                            y2a = 7; 
+                                            sprintf (y2a_label, "Gravity (N)");
+                                            }
+                                            break;    
+                                    case 5: if (i = 1) {
+                                            y1a = 2; 
+                                            sprintf (y1a_label, "Air Density (kg/M^3)");
+                                            }
+                                            if (i = 2) {
+                                            y2a = 2; 
+                                            sprintf (y2a_label, "Air Density (kg/M^3)");
+                                            }
+                                            break;
                                     }
-                                    choice = 0;
+                                    i = i + 1;
                                     }                       
-                                    Graph_plotter(datatable, max, 1, 1, y1a, 5, 4, time_display, time_display, y1a_label, velocity_display, acc_display);
+                                    Graph_plotter(datatable, max, 1, 1, y1a, y2a, 4, time_display, time_display, y1a_label, y2a_label, acc_display);
 }
 
 float timer(float dt){
