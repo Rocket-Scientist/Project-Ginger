@@ -5,7 +5,7 @@
 #include <string.h>
 #include <grx20.h>
 #include <math.h>
-/*#include <windows.h>*/
+#include <windows.h>
 
 const int pressure_at_sea_level = 101325;
 const int radius_of_earth = 6371000;
@@ -132,14 +132,15 @@ int DrawText2(int x, int y, char * message, int xAlign, int yAlign, char color) 
 float max_function(RSIMType datatable, int column){
     float max;
     int row;
+    printf("column = %d\n", column);
     max = datatable.table[0][column];
     for (row=0;  row<MAXROW;  row=row+1){ 
         if( datatable.table[row][column] > max ) {
             max = datatable.table[row][column];
         }
     }
-    printf("max = %.f\n", max);
-    return max;   
+    printf("max= %.2f\n", max);
+    return ceil(max);   
 } 
       
 /* A scaling function where x is the x data point from the initial equations, xres is the bottom right x coordinate of the graph you wish
@@ -172,15 +173,14 @@ int reverse_scale(int x, int start, int end, int max){
 }
       
       
-Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
+Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
     int xres, yres, ob, ib, i, exit_cross_size, xa_max, y1a_max, y2a_max, xb_max, yb_max;
     int x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b;
     char str[80];
     char temp[80];
     char displaytitle[34], acc_display[40], time_display[40], velocity_display[40], Mass_display[40], Altitude_display[40], Drag_display[40], Gravity_display[40], Density_display[40];
     GrMouseEvent evt;
-    /*GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN));  makes the graphics window full size*/
-    GrSetMode(GR_width_height_graphics,1400,700);
+    GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN)-100,GetSystemMetrics(SM_CYSCREEN)-100);  /*makes the graphics window full size*/
     GrClearScreen(15);    /* Makes the graphics window white*/
     ob = 40;
     ib = 10;   
@@ -240,7 +240,7 @@ Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, int vari
                       xa_max = max_function(datatable, variable_xa);
                       y1a_max = max_function(datatable, variable_y1a);
                       y2a_max = max_function(datatable, variable_y2a);
-                      sprintf (y1a_label, "Acceleration (m/s^2) = %03.1d", reverse_scale( evt.y, y1a, y2a, y1a_max));       /*sprintf used to change the values printed in the parameter box in the graphics window*/
+                      printf (y1a_label, "Acceleration (m/s^2) = %03.1d", reverse_scale( evt.y, y1a, y2a, y1a_max));       /*sprintf used to change the values printed in the parameter box in the graphics window*/
                       sprintf (y2a_label, "Velocity (m/s) = %04.0d", reverse_scale( evt.y, y1a, y2a, y2a_max));
                       sprintf (xa_label, "Time = %03.0d", reverse_scale( evt.x, x1a, x2a, xa_max));
             }
@@ -542,7 +542,7 @@ int main() {                                                            /* Main 
         switch(choice) {                                                /* Each one calls a function to perform a certain task.*/
                 case 1:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
                 case 2:  datatable = AskChangeParameters(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time, &centaur_engine_type); break;                             /* The break stops the while loop from running through each option*/                                                             
-                case 3:  Graph_plotter(column_x, column_y, datatable, max, 1, 6, 4, 5, 7, time_display, Altitude_display, acc_display, velocity_display, Mass_display); break;
+                case 3:  Graph_plotter( datatable, max, 1, 6, 8, 5, 3, time_display, Altitude_display, Mass_display, velocity_display, Drag_display); break;
                 case 4:  Export_to_excel(datatable, &detach_atlas_booster_time); break;
                 case 5:  choice = 0; break;                               /* once a case has been selected.*/   
                 default: printf("\nInvalid entry, please try again\n"); } 
@@ -551,3 +551,19 @@ int main() {                                                            /* Main 
    return 0; 
 }
 
+graph_menu(){
+             printf("\nWhich two variables would you like to plot against time?.\n\n");
+             printf("1.\tRocket mass (Kg)\n");
+             printf("2.\tAltitude (m)\n");
+             printf("3.\tDrag (N)\n");
+             printf("4.\tGravity (N)\n");
+             printf("5.\tAir Density (Kg/m^3\n\n");
+             printf("6.\tReturn to menu);
+             while(choice != 0){
+                          switch(choice)
+                                    case 1:  DisplayDataTable(datatable, 0, MAXROW); break;                                               /* When a function like this is called - the data structure is*/
+                                    case 2:  datatable = AskChangeParameters(datatable, &number_of_boosters, &payload, &inert_mass, &drag_coefficient, &thrust_percentage, &start_temp, &detach_SRB_time, &detach_atlas_booster_time, &centaur_engine_type); break;                             /* The break stops the while loop from running through each option*/                                                             
+                                    case 3:  Graph_plotter( datatable, max, 1, 6, 8, 5, 3, time_display, Altitude_display, Mass_display, velocity_display, Drag_display); break;
+                                    case 4:  Export_to_excel(datatable, &detach_atlas_booster_time); break;
+                                    case 5:  choice = 0; break;                               /* once a case has been selected.*/
+                          Graph_plotter( RSIMType datatable, max, 1, 1, variable_y1a, variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
