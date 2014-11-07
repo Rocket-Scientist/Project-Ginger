@@ -172,13 +172,13 @@ int reverse_scale(int x, int start, int end, int max){
       
       
 /*Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb){*/
-Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char y1a_label[40], char y2a_label[40], char yb_label[40]){
+Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char y1a_label[40], char y2a_label[40]){
     int xres, yres, ob, ib, i, exit_cross_size, xa_max, y1a_max, y2a_max, xb_max, yb_max;
     int x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b;
     int row_in_table;
     char str[80];
     char temp[80];
-    char displaytitle[34], time_display[40], y1a_value[40], y2a_value[40], yb_value[40], xa_value[40], xb_value[40];
+    char displaytitle[34], time_display[40], yb_label[40], y1a_value[40], y2a_value[40], yb_value[40], xa_value[40], xb_value[40];
     GrMouseEvent evt;
     GrSetMode(GR_width_height_graphics,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN)); /* makes the graphics window full size*/
     GrClearScreen(15);    /* Makes the graphics window white*/
@@ -188,6 +188,7 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     yres=GrScreenY();
      
     sprintf (time_display, "Time (s)");
+    sprintf (yb_label, "Acceleration (m/s^2)");
     
     x1a = ob/2;
     y1a = (yres/2)+(ob/2)-2*(ib);
@@ -260,8 +261,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
         }
         if(y1a_value[0] != '#'){
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(2*ob), y2a_value, 1, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(3*ob), yb_value, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,((yres/2)+(ob)+(yres/6) - 2*(ob/3)), y2a_value, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,((yres/2)+(ob)+(yres/3) - 4*(ob/3)), yb_value, 2, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200, yres-ob, xb_value, 0, 14);
         }
     }  
@@ -269,9 +270,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
 
 void graph_menu(RSIMType datatable){
      int xa, xb, y1a, y2a, yb, max, choice, option2, i;
-     char y1a_label[40], y2a_label[40], yb_label[40], acc_display[40], time_display[40], velocity_display[40];
+     char y1a_label[40], y2a_label[40];
              
-             sprintf (acc_display, "Acceleration (m/s^2)");         /*Graph labels*/ 
              i = 1;
              while(i != 3){
                           printf("\nWhich two variables would you like to plot against time?.\n\n");
@@ -305,12 +305,12 @@ void graph_menu(RSIMType datatable){
                                                y1a = 3; 
                                                sprintf(y1a_label, "Drag (N)");
                                             }
-                                            if (i = 2) {
-                                               y2a = 6;
-                                               sprintf (y2a_label, "Altitude (m)");
+                                            if (i == 2) {
+                                               y2a = 3;
+                                               sprintf (y2a_label, "Drag (N)");
                                             }
                                             break;    
-                                    case 4: if (i = 1) {
+                                    case 4: if (i == 1) {
                                                y1a = 7; 
                                                sprintf (y1a_label, "Gravity (N)");
                                             }
@@ -334,14 +334,14 @@ void graph_menu(RSIMType datatable){
                                                sprintf(y1a_label, "Velocity (m/s)");
                                             }
                                             if (i == 2) {
-                                               y2a = 2; 
+                                               y2a = 5; 
                                                sprintf (y2a_label, "Velocity (m/s)");
                                             }
                                             break;
                           }
                           i = i + 1;
              }                       
-             Graph_plotter(datatable, max, 1, 1, y1a, y2a, 4, y1a_label, y2a_label, acc_display);
+             Graph_plotter(datatable, max, 1, 1, y1a, y2a, 4, y1a_label, y2a_label);
 }
 
 float timer(float dt){
