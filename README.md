@@ -172,7 +172,7 @@ int reverse_scale(int x, int start, int end, int max){
       
       
 /*Graph_plotter(int column_x, int column_y, RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb){*/
-Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char xa_label[40], char xb_label[40], char y1a_label[40], char y2a_label[40], char yb_label[40]){
+Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, int variable_y1a, int variable_y2a, int variable_yb, char y1a_label[40], char y2a_label[40], char yb_label[40]){
     int xres, yres, ob, ib, i, exit_cross_size, xa_max, y1a_max, y2a_max, xb_max, yb_max;
     int x1a, y1a, x2a, y2a, x1b, y1b, x2b, y2b;
     int row_in_table;
@@ -187,7 +187,7 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     xres=GrScreenX();
     yres=GrScreenY();
      
-    sprintf (time_display, "time (s)");
+    sprintf (time_display, "Time (s)");
     
     x1a = ob/2;
     y1a = (yres/2)+(ob/2)-2*(ib);
@@ -227,15 +227,16 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
     yb_max = max_function(datatable, variable_yb);
     
     i = 1;
+    y1a_value[0] = '#';
     while(i != -1){
 
         GrMouseGetEventT(GR_M_LEFT_DOWN,&evt,0L);
         
         GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(ob), y1a_label, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(2*ob), y2a_label, 1, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(3*ob), yb_label, 2, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(4*ob), time_display, 0, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,((yres/2)+(ob)+(yres/6) - 2*(ob/3)), y2a_label, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,((yres/2)+(ob)+(yres/3) - 4*(ob/3)), yb_label, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres)-(ob), time_display, 0, 14);
                 
         if(evt.buttons == 1){                                   /*this displays the values of the graph where you click in the parameters box*/
             sprintf (y1a_value, "= N/A");        
@@ -257,79 +258,90 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
                GrSetMode(GR_default_text);
             }       
         }
+        if(y1a_value[0] != '#'){
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(2*ob), y2a_value, 1, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(3*ob), yb_value, 2, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(4*ob), xb_value, 0, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200, yres-ob, xb_value, 0, 14);
+        }
     }  
 } 
 
 void graph_menu(RSIMType datatable){
      int xa, xb, y1a, y2a, yb, max, choice, option2, i;
-     char xa_label[40], xb_label[40], y1a_label[40], y2a_label[40], yb_label[40], acc_display[40], time_display[40], velocity_display[40];
+     char y1a_label[40], y2a_label[40], yb_label[40], acc_display[40], time_display[40], velocity_display[40];
              
-             sprintf (acc_display, "Acceleration (m/s^2)");
-             sprintf (velocity_display, "Velocity (m/s)");    /*Graph labels*/ 
-             sprintf (time_display, "time (s)");
+             sprintf (acc_display, "Acceleration (m/s^2)");         /*Graph labels*/ 
              i = 1;
-             while(i < 4){
+             while(i != 3){
                           printf("\nWhich two variables would you like to plot against time?.\n\n");
                           printf("1.\tRocket mass (Kg)\n");
                           printf("2.\tAltitude (m)\n");
                           printf("3.\tDrag (N)\n");
                           printf("4.\tGravity (N)\n");
-                          printf("5.\tAir Density (Kg/m^3\n\n");
+                          printf("5.\tAir Density (Kg/m^3\n");
+                          printf("6.\tVelocity (m/s)\n\n");
                           choice = ValidateData();
                           switch(choice){
-                                    case 1: if (i = 1) {
-                                            y1a = 8;  
-                                            sprintf (y1a_label, "Rocket Mass (kg)");
-                                            }
-                                            if (i = 2) {
-                                            y2a = 8;  
-                                            sprintf (y2a_label, "Rocket Mass (kg)");
+                                    case 1: if (i == 1) {
+                                               y1a = 8;  
+                                               sprintf (y1a_label, "Rocket Mass (kg)");
+                                               }
+                                            if (i == 2) {
+                                               y2a = 8;  
+                                               sprintf (y2a_label, "Rocket Mass (kg)");
                                             }
                                             break;                 
-                                    case 2: if (i = 1) {
-                                            y1a = 6;
-                                            sprintf (y1a_label, "Altitude (m)");
+                                    case 2: if (i == 1) {
+                                               y1a = 6;
+                                               sprintf (y1a_label, "Altitude (m)");
                                             }
-                                            if (i = 2) {
-                                            y2a = 6;
-                                            sprintf (y2a_label, "Altitude (m)");
+                                            if (i == 2) {
+                                               y2a = 6;
+                                               sprintf (y2a_label, "Altitude (m)");
                                             }
                                             break;                                                                                       
-                                    case 3: if (i = 1) {
-                                            y1a = 3; 
-                                            sprintf(y1a_label, "Drag (N)");
+                                    case 3: if (i == 1) {
+                                               y1a = 3; 
+                                               sprintf(y1a_label, "Drag (N)");
                                             }
                                             if (i = 2) {
-                                            y2a = 6;
-                                            sprintf (y2a_label, "Altitude (m)");
+                                               y2a = 6;
+                                               sprintf (y2a_label, "Altitude (m)");
                                             }
                                             break;    
                                     case 4: if (i = 1) {
-                                            y1a = 7; 
-                                            sprintf (y1a_label, "Gravity (N)");
+                                               y1a = 7; 
+                                               sprintf (y1a_label, "Gravity (N)");
                                             }
-                                            if (i = 2) {
-                                            y2a = 7; 
-                                            sprintf (y2a_label, "Gravity (N)");
+                                            if (i == 2) {
+                                               y2a = 7; 
+                                               sprintf (y2a_label, "Gravity (N)");
                                             }
                                             break;    
-                                    case 5: if (i = 1) {
+                                    case 5: 
+                                         if (i == 1) {
                                             y1a = 2; 
                                             sprintf (y1a_label, "Air Density (kg/M^3)");
-                                            }
-                                            if (i = 2) {
-                                            y2a = 2; 
-                                            sprintf (y2a_label, "Air Density (kg/M^3)");
+                                         }
+                                            if (i == 2) {
+                                               y2a = 2; 
+                                               sprintf (y2a_label, "Air Density (kg/M^3)");
                                             }
                                             break;
-                                    }
-                                    i = i + 1;
-                                    }                       
-                                    Graph_plotter(datatable, max, 1, 1, y1a, y2a, 4, time_display, time_display, y1a_label, y2a_label, acc_display);
+                                    case 6: if (i == 1) {
+                                               y1a = 5;
+                                               sprintf(y1a_label, "Velocity (m/s)");
+                                            }
+                                            if (i == 2) {
+                                               y2a = 2; 
+                                               sprintf (y2a_label, "Velocity (m/s)");
+                                            }
+                                            break;
+                          }
+                          i = i + 1;
+             }                       
+             Graph_plotter(datatable, max, 1, 1, y1a, y2a, 4, y1a_label, y2a_label, acc_display);
 }
 
 float timer(float dt){
