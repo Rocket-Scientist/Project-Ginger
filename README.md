@@ -235,8 +235,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
         
         GrFilledBox(((2*(xres-ob))/3)+(ob/2),(yres/2)+(ob/2)+ib,xres-(ob/2),yres-(ob/2),14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres/2)+(ob), y1a_label, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,((yres/2)+(ob)+(yres/6) - 2*(ob/3)), y2a_label, 1, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,((yres/2)+(ob)+(yres/3) - 4*(ob/3)), yb_label, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(4*yres/6)+(ob/3), y2a_label, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(5*yres/6)-(ob/3), yb_label, 2, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib,(yres)-(ob), time_display, 0, 14);
                 
         if(evt.buttons == 1){                                   /*this displays the values of the graph where you click in the parameters box*/
@@ -261,8 +261,8 @@ Graph_plotter( RSIMType datatable,  int max, int variable_xa, int variable_xb, i
         }
         if(y1a_value[0] != '#'){
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(yres/2)+(ob), y1a_value, 4, 14);            /*prints the paramenters from the graph in the 'parameter box' and displays the values of the point at which the user clicks*/
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,((yres/2)+(ob)+(yres/6) - 2*(ob/3)), y2a_value, 1, 14);
-        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,((yres/2)+(ob)+(yres/3) - 4*(ob/3)), yb_value, 2, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(4*yres/6)+(ob/3), y2a_value, 1, 14);
+        GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200,(5*yres/6)-(ob/3), yb_value, 2, 14);
         GrTextXY(((2*(xres-ob))/3)+(ob/2)+ib+200, yres-ob, xb_value, 0, 14);
         }
     }  
